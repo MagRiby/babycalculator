@@ -4,18 +4,21 @@
     padding: 0;
 }
 
+html {
+    height: 100%;
+}
+
 body {
     font-family: 'Arial Black', 'Helvetica Neue', sans-serif;
     background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
+    min-height: 100%;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 15px;
-    padding-bottom: env(safe-area-inset-bottom, 20px);
-    overflow-x: hidden;
+    padding: 10px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 body::before {
@@ -37,7 +40,7 @@ body::before {
     background: linear-gradient(145deg, rgba(20, 20, 30, 0.95), rgba(30, 30, 50, 0.9));
     border: 2px solid;
     border-image: linear-gradient(135deg, #ff0080, #00ffff, #ff00ff) 1;
-    padding: 25px;
+    padding: 20px 15px;
     text-align: center;
     max-width: 420px;
     width: 100%;
@@ -47,6 +50,7 @@ body::before {
         0 0 40px rgba(255, 0, 128, 0.3),
         0 0 80px rgba(0, 255, 255, 0.2),
         inset 0 0 60px rgba(255, 0, 128, 0.05);
+    margin-bottom: 20px;
 }
 
 h1 {
@@ -172,7 +176,7 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
 .hidden {
@@ -258,8 +262,8 @@ h1 {
 }
 
 .num-btn {
-    font-size: 1.8rem;
-    padding: 18px;
+    font-size: 1.5rem;
+    padding: 14px;
     background: linear-gradient(145deg, rgba(40, 40, 60, 0.9), rgba(20, 20, 40, 0.9));
     border: 2px solid #ff0080;
     color: #fff;
