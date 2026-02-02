@@ -1,0 +1,279 @@
+// Audio context for sound effects
+let audioCtx = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+function playSound(type) {
+    if (!audioCtx) return;
+    
+    const now = audioCtx.currentTime;
+    
+    if (type === 'click') {
+        // Short click/tap sound
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.05);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+    }
+    else if (type === 'correct') {
+        // Happy ascending arpeggio
+        const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+        notes.forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0, now + i * 0.08);
+            gain.gain.linearRampToValueAtTime(0.2, now + i * 0.08 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.3);
+            osc.start(now + i * 0.08);
+            osc.stop(now + i * 0.08 + 0.3);
+        });
+        // Add a sparkle
+        const noise = audioCtx.createOscillator();
+        const noiseGain = audioCtx.createGain();
+        noise.type = 'triangle';
+        noise.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+        noise.frequency.setValueAtTime(2000, now + 0.3);
+        noise.frequency.exponentialRampToValueAtTime(4000, now + 0.5);
+        noiseGain.gain.setValueAtTime(0.1, now + 0.3);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        noise.start(now + 0.3);
+        noise.stop(now + 0.5);
+    }
+    else if (type === 'wrong') {
+        // Descending "womp womp"
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.3);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    }
+    else if (type === 'start') {
+        // Energetic start jingle
+        const melody = [523, 659, 784, 880, 1047];
+        melody.forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0, now + i * 0.06);
+            gain.gain.linearRampToValueAtTime(0.12, now + i * 0.06 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.06 + 0.15);
+            osc.start(now + i * 0.06);
+            osc.stop(now + i * 0.06 + 0.15);
+        });
+    }
+}
+
+const settings = document.getElementById('settings');
+const game = document.getElementById('game');
+const startBtn = document.getElementById('startBtn');
+const maxNumberSelect = document.getElementById('maxNumber');
+const num1El = document.getElementById('num1');
+const num2El = document.getElementById('num2');
+const answerDisplay = document.getElementById('answerDisplay');
+const submitBtn = document.getElementById('submitBtn');
+const feedback = document.getElementById('feedback');
+const scoreEl = document.getElementById('score');
+const streakEl = document.getElementById('streak');
+const newGameBtn = document.getElementById('newGameBtn');
+const numButtons = document.querySelectorAll('.num-btn');
+
+let score = 0;
+let streak = 0;
+let currentAnswer = 0;
+let maxNumber = 10;
+let userInput = '';
+
+// BABYMONSTER song references!
+const correctMessages = [
+    'SHEESH! 🔥',           // SHEESH
+    'BATTER UP! ⚾',        // Batter Up  
+    'FOREVER! 💜',          // Forever
+    'STUCK IN THE MIDDLE!', // Stuck In The Middle
+    'LIKE THAT! 💖',        // Like That
+    'CLIK CLIK CLIK! 📸',   // Clik Clik
+    'DANCE DANCE! 💃',      // Dance Performance
+    'MONSTERS! 👹'          // Their fandom name
+];
+const wrongMessages = [
+    'PSYCHO... 🌀',         // Reference to their vibe
+    'DREAM... 💭',          // Dreamy concept
+    'ENCORE! 🎤'            // Try again like an encore
+];
+
+startBtn.addEventListener('click', () => {
+    initAudio();
+    playSound('start');
+    startGame();
+});
+submitBtn.addEventListener('click', checkAnswer);
+newGameBtn.addEventListener('click', () => {
+    settings.classList.remove('hidden');
+    game.classList.add('hidden');
+    newGameBtn.classList.add('hidden');
+    score = 0;
+    streak = 0;
+});
+
+// Number pad handling
+numButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        playSound('click');
+        const num = btn.dataset.num;
+        const action = btn.dataset.action;
+        
+        if (num !== undefined) {
+            if (userInput.length < 3) {
+                userInput += num;
+                updateDisplay();
+            }
+        } else if (action === 'clear') {
+            userInput = '';
+            updateDisplay();
+        } else if (action === 'back') {
+            userInput = userInput.slice(0, -1);
+            updateDisplay();
+        }
+    });
+});
+
+// Keep keyboard support for testing on laptop
+document.addEventListener('keydown', (e) => {
+    if (game.classList.contains('hidden')) return;
+    
+    if (e.key >= '0' && e.key <= '9') {
+        if (userInput.length < 3) {
+            userInput += e.key;
+            updateDisplay();
+        }
+    } else if (e.key === 'Backspace') {
+        userInput = userInput.slice(0, -1);
+        updateDisplay();
+    } else if (e.key === 'Enter') {
+        checkAnswer();
+    } else if (e.key === 'Escape') {
+        userInput = '';
+        updateDisplay();
+    }
+});
+
+function updateDisplay() {
+    answerDisplay.textContent = userInput;
+    if (userInput === '') {
+        answerDisplay.classList.add('empty');
+    } else {
+        answerDisplay.classList.remove('empty');
+    }
+}
+
+function startGame() {
+    maxNumber = parseInt(maxNumberSelect.value);
+    score = 0;
+    streak = 0;
+    userInput = '';
+    scoreEl.textContent = score;
+    streakEl.textContent = streak;
+    settings.classList.add('hidden');
+    game.classList.remove('hidden');
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+    updateDisplay();
+    generateQuestion();
+}
+
+function generateQuestion() {
+    const n1 = Math.floor(Math.random() * maxNumber) + 1;
+    const n2 = Math.floor(Math.random() * maxNumber) + 1;
+    num1El.textContent = n1;
+    num2El.textContent = n2;
+    currentAnswer = n1 * n2;
+    userInput = '';
+    updateDisplay();
+}
+
+function checkAnswer() {
+    const userAnswer = parseInt(userInput);
+    
+    if (isNaN(userAnswer) || userInput === '') {
+        feedback.textContent = 'ENTRE UN NOMBRE !';
+        feedback.className = 'feedback';
+        return;
+    }
+    
+    if (userAnswer === currentAnswer) {
+        playSound('correct');
+        score++;
+        streak++;
+        scoreEl.textContent = score;
+        streakEl.textContent = streak;
+        feedback.textContent = correctMessages[Math.floor(Math.random() * correctMessages.length)];
+        feedback.className = 'feedback correct';
+        spawnConfetti();
+        
+        setTimeout(generateQuestion, 800);
+    } else {
+        playSound('wrong');
+        streak = 0;
+        streakEl.textContent = streak;
+        feedback.textContent = wrongMessages[Math.floor(Math.random() * wrongMessages.length)] + ` (${currentAnswer})`;
+        feedback.className = 'feedback wrong';
+        
+        setTimeout(generateQuestion, 1500);
+    }
+}
+
+function spawnConfetti() {
+    const emojis = ['💖', '⭐', '✨', '💫', '🔥', '💜', '🖤', '💗', '🌟', '💕'];
+    
+    // Big center burst
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            confetti.style.left = '50%';
+            confetti.style.top = '50%';
+            confetti.style.setProperty('--tx', (Math.random() - 0.5) * 400 + 'px');
+            confetti.style.setProperty('--ty', (Math.random() - 0.5) * 400 + 'px');
+            confetti.style.setProperty('--rot', Math.random() * 720 - 360 + 'deg');
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 1500);
+        }, i * 30);
+    }
+    
+    // Screen flash
+    const flash = document.createElement('div');
+    flash.className = 'screen-flash';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 500);
+    
+    // Floating big text - BABYMONSTER references
+    const bigText = document.createElement('div');
+    bigText.className = 'big-celebration';
+    bigText.textContent = ['SHEESH!', 'BATTER UP!', 'LIKE THAT!', '🔥 FIRE 🔥', 'CLIK CLIK!'][Math.floor(Math.random() * 5)];
+    document.body.appendChild(bigText);
+    setTimeout(() => bigText.remove(), 1200);
+}
