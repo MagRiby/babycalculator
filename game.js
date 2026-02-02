@@ -10,6 +10,11 @@ function initAudio() {
 function playSound(type) {
     if (!audioCtx) return;
     
+    // Resume context if suspended (iOS requirement)
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    
     const now = audioCtx.currentTime;
     
     if (type === 'click') {
@@ -25,7 +30,8 @@ function playSound(type) {
         osc.stop(now + 0.05);
     }
     else if (type === 'correct') {
-        const notes = [523, 659, 784, 1047];
+        // Victory fanfare - bright and celebratory
+        const notes = [523, 659, 784, 1047, 1319]; // C5, E5, G5, C6, E6
         notes.forEach((freq, i) => {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -33,36 +39,48 @@ function playSound(type) {
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.frequency.setValueAtTime(freq, now);
-            gain.gain.setValueAtTime(0, now + i * 0.08);
-            gain.gain.linearRampToValueAtTime(0.2, now + i * 0.08 + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.3);
-            osc.start(now + i * 0.08);
-            osc.stop(now + i * 0.08 + 0.3);
+            gain.gain.setValueAtTime(0, now + i * 0.07);
+            gain.gain.linearRampToValueAtTime(0.25, now + i * 0.07 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.07 + 0.35);
+            osc.start(now + i * 0.07);
+            osc.stop(now + i * 0.07 + 0.35);
         });
-        const noise = audioCtx.createOscillator();
-        const noiseGain = audioCtx.createGain();
-        noise.type = 'triangle';
-        noise.connect(noiseGain);
-        noiseGain.connect(audioCtx.destination);
-        noise.frequency.setValueAtTime(2000, now + 0.3);
-        noise.frequency.exponentialRampToValueAtTime(4000, now + 0.5);
-        noiseGain.gain.setValueAtTime(0.1, now + 0.3);
-        noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-        noise.start(now + 0.3);
-        noise.stop(now + 0.5);
+        // Sparkle effect
+        setTimeout(() => {
+            const sparkle = audioCtx.createOscillator();
+            const sparkleGain = audioCtx.createGain();
+            sparkle.type = 'triangle';
+            sparkle.connect(sparkleGain);
+            sparkleGain.connect(audioCtx.destination);
+            sparkle.frequency.setValueAtTime(2500, audioCtx.currentTime);
+            sparkle.frequency.exponentialRampToValueAtTime(4000, audioCtx.currentTime + 0.2);
+            sparkleGain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            sparkleGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            sparkle.start(audioCtx.currentTime);
+            sparkle.stop(audioCtx.currentTime + 0.2);
+        }, 300);
     }
     else if (type === 'wrong') {
-        const osc = audioCtx.createOscillator();
+        // Sad descending tone - clear "wrong" sound
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = 'sawtooth';
-        osc.connect(gain);
+        osc1.type = 'sawtooth';
+        osc2.type = 'sine';
+        osc1.connect(gain);
+        osc2.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.exponentialRampToValueAtTime(150, now + 0.3);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now);
-        osc.stop(now + 0.3);
+        // First note
+        osc1.frequency.setValueAtTime(350, now);
+        osc1.frequency.exponentialRampToValueAtTime(200, now + 0.25);
+        osc2.frequency.setValueAtTime(350, now);
+        osc2.frequency.exponentialRampToValueAtTime(200, now + 0.25);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.4);
+        osc2.stop(now + 0.4);
     }
     else if (type === 'start') {
         const melody = [523, 659, 784, 880, 1047];

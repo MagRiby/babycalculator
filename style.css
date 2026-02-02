@@ -40,9 +40,9 @@ body::before {
     background: linear-gradient(145deg, rgba(20, 20, 30, 0.95), rgba(30, 30, 50, 0.9));
     border: 2px solid;
     border-image: linear-gradient(135deg, #ff0080, #00ffff, #ff00ff) 1;
-    padding: 20px 15px;
+    padding: 15px 12px;
     text-align: center;
-    max-width: 420px;
+    max-width: 400px;
     width: 100%;
     position: relative;
     z-index: 1;
@@ -54,8 +54,8 @@ body::before {
 }
 
 h1 {
-    font-size: 1.6rem;
-    margin-bottom: 20px;
+    font-size: 1.4rem;
+    margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 3px;
     background: linear-gradient(90deg, #ff0080, #00ffff, #ff00ff, #ff0080);
@@ -161,7 +161,8 @@ h1 {
     clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
     box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
     width: 100%;
-    margin-top: 10px;
+    margin-top: 5px;
+    padding: 12px 35px;
 }
 
 .btn-new {
@@ -176,7 +177,7 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .hidden {
@@ -203,10 +204,10 @@ h1 {
 }
 
 .question {
-    font-size: 2.5rem;
+    font-size: 2rem;
     color: #fff;
     font-weight: bold;
-    padding: 20px 30px;
+    padding: 12px 20px;
     background: rgba(0, 0, 0, 0.5);
     border: 2px solid #ff00ff;
     position: relative;
@@ -227,14 +228,14 @@ h1 {
 }
 
 .answer-display {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
     width: 100%;
     text-align: center;
-    padding: 15px;
+    padding: 10px;
     background: rgba(0, 0, 0, 0.7);
     border: 2px solid #00ffff;
     color: #00ffff;
-    min-height: 60px;
+    min-height: 45px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -252,18 +253,17 @@ h1 {
     51%, 100% { opacity: 0; }
 }
 
-/* Number Pad */
 .numpad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 6px;
     width: 100%;
-    max-width: 300px;
+    max-width: 280px;
 }
 
 .num-btn {
-    font-size: 1.5rem;
-    padding: 14px;
+    font-size: 1.4rem;
+    padding: 12px;
     background: linear-gradient(145deg, rgba(40, 40, 60, 0.9), rgba(20, 20, 40, 0.9));
     border: 2px solid #ff0080;
     color: #fff;
@@ -311,9 +311,9 @@ h1 {
 }
 
 .feedback {
-    font-size: 1.5rem;
-    min-height: 40px;
-    padding: 10px;
+    font-size: 1.2rem;
+    min-height: 30px;
+    padding: 5px;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
