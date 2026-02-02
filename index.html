@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>BABYMONSTER Maths!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="corner-decor tl"></div>
+        <div class="corner-decor tr"></div>
+        <div class="corner-decor bl"></div>
+        <div class="corner-decor br"></div>
+        
+        <div class="logo">★ BABYMONSTER ★</div>
+        <h1>Maths Attack!</h1>
+        
+        <div id="settings" class="settings">
+            <label>Tables jusqu'à : 
+                <select id="maxNumber">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="12">12</option>
+                </select>
+            </label>
+            <button id="startBtn" class="btn btn-start">C'est parti !</button>
+        </div>
+
+        <div id="game" class="game hidden">
+            <div class="score-board">
+                <span>Score : <span id="score">0</span></span>
+                <span>🔥 Série : <span id="streak">0</span></span>
+            </div>
+            
+            <div class="question">
+                <span id="num1">?</span> × <span id="num2">?</span> = ?
+            </div>
+            
+            <div id="answerDisplay" class="answer-display empty"></div>
+            
+            <div class="numpad">
+                <button class="num-btn" data-num="1">1</button>
+                <button class="num-btn" data-num="2">2</button>
+                <button class="num-btn" data-num="3">3</button>
+                <button class="num-btn" data-num="4">4</button>
+                <button class="num-btn" data-num="5">5</button>
+                <button class="num-btn" data-num="6">6</button>
+                <button class="num-btn" data-num="7">7</button>
+                <button class="num-btn" data-num="8">8</button>
+                <button class="num-btn" data-num="9">9</button>
+                <button class="num-btn clear" data-action="clear">EFF</button>
+                <button class="num-btn zero" data-num="0">0</button>
+                <button class="num-btn backspace" data-action="back">⌫</button>
+            </div>
+            
+            <button id="submitBtn" class="btn btn-submit">Vérifier !</button>
+            
+            <div id="feedback" class="feedback"></div>
+            
+            <button id="newGameBtn" class="btn btn-new hidden">Nouvelle Partie</button>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
