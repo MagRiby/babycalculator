@@ -113,6 +113,7 @@ const scoreEl = document.getElementById('score');
 const streakEl = document.getElementById('streak');
 const newGameBtn = document.getElementById('newGameBtn');
 const numButtons = document.querySelectorAll('.num-btn');
+const robot = document.getElementById('robot');
 
 let score = 0;
 let streak = 0;
@@ -120,21 +121,26 @@ let currentAnswer = 0;
 let maxNumber = 10;
 let userInput = '';
 
-// BABYMONSTER song references!
+// BABYMONSTER song references + Korean encouragement!
 const correctMessages = [
     'SHEESH! 🔥',
     'BATTER UP! ⚾',
     'FOREVER! 💜',
-    'STUCK IN THE MIDDLE!',
+    '대박! (Daebak!) 🌟',      // Amazing!
+    '잘했어! (Jalhesseo!) 💖',  // Well done!
+    '최고! (Chego!) 👑',       // The best!
+    '화이팅! (Hwaiting!) 💪',  // Fighting!
+    '완벽해! (Wanbyeokae!) ✨', // Perfect!
     'LIKE THAT! 💖',
     'CLIK CLIK CLIK! 📸',
-    'DANCE DANCE! 💃',
-    'MONSTERS! 👹'
+    '멋져! (Meotjyeo!) 🔥',    // Awesome!
+    '천재! (Cheonjae!) 🧠'     // Genius!
 ];
 const wrongMessages = [
-    'PSYCHO... 🌀',
-    'DREAM... 💭',
-    'ENCORE! 🎤'
+    '괜찮아~ (Gwaenchana~) 💭',  // It's okay~
+    '다시! (Dasi!) 🎤',          // Again!
+    '힘내! (Himnae!) 💪',        // Cheer up!
+    '아깝다~ (Akkapda~) 😅'      // So close~
 ];
 
 startBtn.addEventListener('click', () => {
@@ -236,6 +242,8 @@ function checkAnswer() {
     
     if (userAnswer === currentAnswer) {
         playSound('correct');
+        robot.className = 'robot happy';
+        setTimeout(() => robot.className = 'robot', 800);
         score++;
         streak++;
         scoreEl.textContent = score;
@@ -247,6 +255,8 @@ function checkAnswer() {
         setTimeout(generateQuestion, 800);
     } else {
         playSound('wrong');
+        robot.className = 'robot sad';
+        setTimeout(() => robot.className = 'robot', 1500);
         streak = 0;
         streakEl.textContent = streak;
         feedback.textContent = wrongMessages[Math.floor(Math.random() * wrongMessages.length)] + ` (${currentAnswer})`;
