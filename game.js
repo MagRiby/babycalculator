@@ -129,6 +129,8 @@ let timer = null;
 let timeLeft = 11;
 const TIMER_DURATION = 11;
 let challenges = []; // Array of {n1, n2, answer}
+let currentIsChallenge = false;
+let currentChallengeIndex = -1;
 
 // BABYMONSTER song references + Korean encouragement!
 const correctMessages = [
@@ -237,6 +239,7 @@ function startGame() {
 
 function generateQuestion() {
     stopTimer();
+    currentIsChallenge = false;
     
     // 30% chance to pick from challenges if there are any
     if (challenges.length > 0 && Math.random() < 0.3) {
@@ -245,10 +248,14 @@ function generateQuestion() {
         currentNum1 = challenge.n1;
         currentNum2 = challenge.n2;
         currentAnswer = challenge.answer;
+        currentIsChallenge = true;
+        currentChallengeIndex = challengeIndex;
+        highlightChallenge(challengeIndex);
     } else {
         currentNum1 = Math.floor(Math.random() * maxNumber) + 1;
         currentNum2 = Math.floor(Math.random() * maxNumber) + 1;
         currentAnswer = currentNum1 * currentNum2;
+        clearChallengeHighlight();
     }
     
     num1El.textContent = currentNum1;
@@ -256,6 +263,22 @@ function generateQuestion() {
     userInput = '';
     updateDisplay();
     startTimer();
+}
+
+function highlightChallenge(index) {
+    const items = challengesList.querySelectorAll('.challenge-item');
+    items.forEach((item, i) => {
+        if (i === index) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+function clearChallengeHighlight() {
+    const items = challengesList.querySelectorAll('.challenge-item');
+    items.forEach(item => item.classList.remove('active'));
 }
 
 function checkAnswer() {
@@ -396,11 +419,11 @@ function spawnConfetti() {
             confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
             confetti.style.left = '50%';
             confetti.style.top = '50%';
-            confetti.style.setProperty('--tx', (Math.random() - 0.5) * 400 + 'px');
-            confetti.style.setProperty('--ty', (Math.random() - 0.5) * 400 + 'px');
+            confetti.style.setProperty('--tx', (Math.random() - 0.5) * 520 + 'px');
+            confetti.style.setProperty('--ty', (Math.random() - 0.5) * 520 + 'px');
             confetti.style.setProperty('--rot', Math.random() * 720 - 360 + 'deg');
             document.body.appendChild(confetti);
-            setTimeout(() => confetti.remove(), 1500);
+            setTimeout(() => confetti.remove(), 2000);
         }, i * 30);
     }
     

@@ -85,14 +85,14 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 5px 0;
+    margin: 8px 0;
 }
 
 .robot-antenna {
-    width: 4px;
-    height: 12px;
+    width: 6px;
+    height: 18px;
     background: linear-gradient(to top, #ff0080, #00ffff);
-    border-radius: 2px;
+    border-radius: 3px;
     position: relative;
     animation: antenna-blink 2s ease-in-out infinite;
 }
@@ -100,38 +100,40 @@ h1 {
 .robot-antenna::after {
     content: '';
     position: absolute;
-    top: -6px;
+    top: -10px;
     left: 50%;
     transform: translateX(-50%);
-    width: 8px;
-    height: 8px;
+    width: 14px;
+    height: 14px;
     background: #00ffff;
     border-radius: 50%;
-    box-shadow: 0 0 10px #00ffff;
+    box-shadow: 0 0 15px #00ffff;
     animation: glow-pulse 1s ease-in-out infinite;
 }
 
 .robot-head {
-    width: 50px;
-    height: 40px;
+    width: 70px;
+    height: 55px;
     background: linear-gradient(145deg, #2a2a4a, #1a1a2e);
-    border: 2px solid #ff0080;
-    border-radius: 10px;
+    border: 3px solid #ff0080;
+    border-radius: 12px;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
-    box-shadow: 0 0 15px rgba(255, 0, 128, 0.3);
+    gap: 18px;
+    box-shadow: 0 0 20px rgba(255, 0, 128, 0.4);
+    transition: all 0.3s ease;
 }
 
 .robot-eye {
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
     background: #00ffff;
     border-radius: 50%;
-    box-shadow: 0 0 8px #00ffff;
+    box-shadow: 0 0 12px #00ffff;
     animation: blink-eyes 3s ease-in-out infinite;
+    transition: all 0.3s ease;
 }
 
 .robot-eye.left { animation-delay: 0s; }
@@ -139,35 +141,56 @@ h1 {
 
 .robot-mouth {
     position: absolute;
-    bottom: 8px;
-    width: 16px;
-    height: 4px;
+    bottom: 10px;
+    width: 20px;
+    height: 5px;
     background: #ff0080;
-    border-radius: 2px;
-    transition: all 0.3s;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.robot.happy .robot-head {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+    border-color: #00ff88;
 }
 
 .robot.happy .robot-eye {
-    animation: happy-eyes 0.5s ease;
+    animation: happy-eyes 0.6s ease;
     background: #00ff88;
-    box-shadow: 0 0 12px #00ff88;
+    box-shadow: 0 0 20px #00ff88;
+    width: 18px;
+    height: 18px;
 }
 
 .robot.happy .robot-mouth {
-    height: 8px;
-    border-radius: 0 0 8px 8px;
+    height: 12px;
+    width: 24px;
+    border-radius: 0 0 12px 12px;
     background: #00ff88;
+}
+
+.robot.happy .robot-antenna::after {
+    background: #00ff88;
+    box-shadow: 0 0 25px #00ff88;
+    animation: antenna-happy 0.3s ease infinite;
+}
+
+.robot.sad .robot-head {
+    transform: scale(0.95);
+    border-color: #ff4444;
 }
 
 .robot.sad .robot-eye {
     background: #ff4444;
-    box-shadow: 0 0 8px #ff4444;
+    box-shadow: 0 0 12px #ff4444;
+    height: 8px;
 }
 
 .robot.sad .robot-mouth {
-    width: 12px;
-    border-radius: 8px 8px 0 0;
-    transform: translateY(2px);
+    width: 14px;
+    border-radius: 10px 10px 0 0;
+    transform: translateY(3px);
 }
 
 @keyframes antenna-blink {
@@ -176,8 +199,8 @@ h1 {
 }
 
 @keyframes glow-pulse {
-    0%, 100% { box-shadow: 0 0 10px #00ffff; transform: translateX(-50%) scale(1); }
-    50% { box-shadow: 0 0 20px #00ffff; transform: translateX(-50%) scale(1.2); }
+    0%, 100% { box-shadow: 0 0 15px #00ffff; transform: translateX(-50%) scale(1); }
+    50% { box-shadow: 0 0 25px #00ffff; transform: translateX(-50%) scale(1.3); }
 }
 
 @keyframes blink-eyes {
@@ -187,7 +210,12 @@ h1 {
 
 @keyframes happy-eyes {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.3); }
+    50% { transform: scale(1.4); }
+}
+
+@keyframes antenna-happy {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.5); }
 }
 
 .settings {
@@ -453,8 +481,8 @@ h1 {
 
 .confetti {
     position: fixed;
-    font-size: 3rem;
-    animation: confetti-explode 1.5s ease-out forwards;
+    font-size: 3.5rem;
+    animation: confetti-explode 2s ease-out forwards;
     pointer-events: none;
     z-index: 100;
     transform: translate(-50%, -50%);
@@ -465,13 +493,13 @@ h1 {
         opacity: 1; 
         transform: translate(-50%, -50%) rotate(0deg) scale(0.5); 
     }
-    50% {
+    60% {
         opacity: 1;
-        transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--rot)) scale(1.5);
+        transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--rot)) scale(1.8);
     }
     100% { 
         opacity: 0; 
-        transform: translate(calc(-50% + var(--tx) * 1.5), calc(-50% + var(--ty) * 1.5)) rotate(var(--rot)) scale(0); 
+        transform: translate(calc(-50% + var(--tx) * 1.5), calc(-50% + var(--ty) * 1.5)) rotate(var(--rot)) scale(0.5); 
     }
 }
 
@@ -535,16 +563,16 @@ h1 {
 .challenges-panel {
     position: absolute;
     top: 10px;
-    right: -60px;
-    width: 55px;
+    right: -75px;
+    width: 70px;
     background: rgba(20, 20, 40, 0.95);
     border: 2px solid #ff00ff;
     border-radius: 10px;
-    padding: 5px;
+    padding: 8px;
     display: none;
     flex-direction: column;
-    gap: 5px;
-    max-height: 300px;
+    gap: 6px;
+    max-height: 350px;
     overflow-y: auto;
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
     z-index: 10;
@@ -555,28 +583,37 @@ h1 {
 }
 
 .challenges-header {
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     color: #ff00ff;
     text-align: center;
-    padding: 3px;
+    padding: 4px;
     border-bottom: 1px solid #ff00ff;
 }
 
 .challenges-list {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 5px;
 }
 
 .challenge-item {
-    font-size: 0.55rem;
+    font-size: 0.75rem;
     color: #fff;
     background: rgba(255, 0, 128, 0.2);
-    padding: 4px;
-    border-radius: 5px;
+    padding: 8px 6px;
+    border-radius: 8px;
     text-align: center;
-    border: 1px solid #ff0080;
+    border: 2px solid #ff0080;
     animation: challenge-appear 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+.challenge-item.active {
+    background: rgba(255, 255, 0, 0.4);
+    border-color: #ffff00;
+    transform: scale(1.25);
+    box-shadow: 0 0 20px rgba(255, 255, 0, 0.6);
+    z-index: 20;
 }
 
 .challenge-item.solved {
@@ -592,40 +629,44 @@ h1 {
 
 @keyframes challenge-solved {
     0% { transform: scale(1); }
-    50% { transform: scale(1.2); background: rgba(0, 255, 136, 0.6); }
+    50% { transform: scale(1.3); background: rgba(0, 255, 136, 0.6); }
     100% { transform: scale(0); opacity: 0; }
 }
 
 /* Timer Bar */
 .timer-bar {
     width: 100%;
-    height: 6px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 3px;
+    height: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 5px;
     overflow: hidden;
-    border: 1px solid #ff0080;
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .timer-fill {
     height: 100%;
     width: 100%;
-    background: linear-gradient(90deg, #00ff88, #00ffff, #ff0080);
+    background: linear-gradient(90deg, #00ff88, #00ffff);
     border-radius: 3px;
     transition: width 0.1s linear;
+    box-shadow: 0 0 10px #00ff88;
 }
 
 .timer-fill.warning {
-    background: linear-gradient(90deg, #ff4444, #ff0080);
+    background: linear-gradient(90deg, #ffaa00, #ff6600);
+    box-shadow: 0 0 10px #ffaa00;
 }
 
 .timer-fill.critical {
-    background: #ff4444;
+    background: #ff2222;
+    box-shadow: 0 0 15px #ff2222;
     animation: timer-pulse 0.3s ease infinite;
 }
 
 @keyframes timer-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    0%, 100% { opacity: 1; box-shadow: 0 0 15px #ff2222; }
+    50% { opacity: 0.6; box-shadow: 0 0 25px #ff2222; }
 }
 
 /* Decorative elements */
