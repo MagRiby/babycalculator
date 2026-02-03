@@ -114,12 +114,21 @@ const streakEl = document.getElementById('streak');
 const newGameBtn = document.getElementById('newGameBtn');
 const numButtons = document.querySelectorAll('.num-btn');
 const robot = document.getElementById('robot');
+const timerFill = document.getElementById('timerFill');
+const challengesPanel = document.getElementById('challengesPanel');
+const challengesList = document.getElementById('challengesList');
 
 let score = 0;
 let streak = 0;
 let currentAnswer = 0;
 let maxNumber = 10;
 let userInput = '';
+let currentNum1 = 0;
+let currentNum2 = 0;
+let timer = null;
+let timeLeft = 11;
+const TIMER_DURATION = 11;
+let challenges = []; // Array of {n1, n2, answer}
 
 // BABYMONSTER song references + Korean encouragement!
 const correctMessages = [
@@ -150,11 +159,14 @@ startBtn.addEventListener('click', () => {
 });
 submitBtn.addEventListener('click', checkAnswer);
 newGameBtn.addEventListener('click', () => {
+    stopTimer();
     settings.classList.remove('hidden');
     game.classList.add('hidden');
     newGameBtn.classList.add('hidden');
+    challengesPanel.classList.remove('visible');
     score = 0;
     streak = 0;
+    challenges = [];
 });
 
 numButtons.forEach(btn => {
@@ -211,6 +223,8 @@ function startGame() {
     score = 0;
     streak = 0;
     userInput = '';
+    challenges = [];
+    updateChallengesPanel();
     scoreEl.textContent = score;
     streakEl.textContent = streak;
     settings.classList.add('hidden');
@@ -222,21 +236,36 @@ function startGame() {
 }
 
 function generateQuestion() {
-    const n1 = Math.floor(Math.random() * maxNumber) + 1;
-    const n2 = Math.floor(Math.random() * maxNumber) + 1;
-    num1El.textContent = n1;
-    num2El.textContent = n2;
-    currentAnswer = n1 * n2;
+    stopTimer();
+    
+    // 30% chance to pick from challenges if there are any
+    if (challenges.length > 0 && Math.random() < 0.3) {
+        const challengeIndex = Math.floor(Math.random() * challenges.length);
+        const challenge = challenges[challengeIndex];
+        currentNum1 = challenge.n1;
+        currentNum2 = challenge.n2;
+        currentAnswer = challenge.answer;
+    } else {
+        currentNum1 = Math.floor(Math.random() * maxNumber) + 1;
+        currentNum2 = Math.floor(Math.random() * maxNumber) + 1;
+        currentAnswer = currentNum1 * currentNum2;
+    }
+    
+    num1El.textContent = currentNum1;
+    num2El.textContent = currentNum2;
     userInput = '';
     updateDisplay();
+    startTimer();
 }
 
 function checkAnswer() {
+    stopTimer();
     const userAnswer = parseInt(userInput);
     
     if (isNaN(userAnswer) || userInput === '') {
         feedback.textContent = 'ENTRE UN NOMBRE !';
         feedback.className = 'feedback';
+        startTimer();
         return;
     }
     
@@ -250,19 +279,110 @@ function checkAnswer() {
         streakEl.textContent = streak;
         feedback.textContent = correctMessages[Math.floor(Math.random() * correctMessages.length)];
         feedback.className = 'feedback correct';
+        
+        // Check if this was a challenge and remove it
+        removeChallengeIfExists(currentNum1, currentNum2);
+        
         spawnConfetti();
         
         setTimeout(generateQuestion, 800);
     } else {
-        playSound('wrong');
-        robot.className = 'robot sad';
-        setTimeout(() => robot.className = 'robot', 1500);
-        streak = 0;
-        streakEl.textContent = streak;
-        feedback.textContent = wrongMessages[Math.floor(Math.random() * wrongMessages.length)] + ` (${currentAnswer})`;
-        feedback.className = 'feedback wrong';
+        handleWrongAnswer();
+    }
+}
+
+function handleWrongAnswer() {
+    playSound('wrong');
+    robot.className = 'robot sad';
+    setTimeout(() => robot.className = 'robot', 1500);
+    streak = 0;
+    streakEl.textContent = streak;
+    feedback.textContent = wrongMessages[Math.floor(Math.random() * wrongMessages.length)] + ` (${currentAnswer})`;
+    feedback.className = 'feedback wrong';
+    
+    // Add to challenges if not already there
+    addToChallenge(currentNum1, currentNum2, currentAnswer);
+    
+    setTimeout(generateQuestion, 1500);
+}
+
+function addToChallenge(n1, n2, answer) {
+    // Check if already exists
+    const exists = challenges.some(c => 
+        (c.n1 === n1 && c.n2 === n2) || (c.n1 === n2 && c.n2 === n1)
+    );
+    
+    if (!exists) {
+        challenges.push({ n1, n2, answer });
+        updateChallengesPanel();
+    }
+}
+
+function removeChallengeIfExists(n1, n2) {
+    const index = challenges.findIndex(c => 
+        (c.n1 === n1 && c.n2 === n2) || (c.n1 === n2 && c.n2 === n1)
+    );
+    
+    if (index !== -1) {
+        // Mark as solved with animation
+        const items = challengesList.querySelectorAll('.challenge-item');
+        if (items[index]) {
+            items[index].classList.add('solved');
+        }
         
-        setTimeout(generateQuestion, 1500);
+        // Remove after animation
+        setTimeout(() => {
+            challenges.splice(index, 1);
+            updateChallengesPanel();
+        }, 500);
+        
+        // Extra celebration for solving a challenge!
+        playSound('correct');
+    }
+}
+
+function updateChallengesPanel() {
+    if (challenges.length === 0) {
+        challengesPanel.classList.remove('visible');
+        return;
+    }
+    
+    challengesPanel.classList.add('visible');
+    challengesList.innerHTML = challenges.map(c => 
+        `<div class="challenge-item">${c.n1}×${c.n2}</div>`
+    ).join('');
+}
+
+function startTimer() {
+    timeLeft = TIMER_DURATION;
+    timerFill.style.width = '100%';
+    timerFill.className = 'timer-fill';
+    
+    timer = setInterval(() => {
+        timeLeft -= 0.1;
+        const percent = (timeLeft / TIMER_DURATION) * 100;
+        timerFill.style.width = percent + '%';
+        
+        if (timeLeft <= 3) {
+            timerFill.className = 'timer-fill critical';
+        } else if (timeLeft <= 5) {
+            timerFill.className = 'timer-fill warning';
+        }
+        
+        if (timeLeft <= 0) {
+            stopTimer();
+            // Time's up - treat as wrong answer
+            feedback.textContent = '⏰ TEMPS ÉCOULÉ!';
+            feedback.className = 'feedback wrong';
+            handleWrongAnswer();
+        }
+    }, 100);
+}
+
+function stopTimer() {
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
     }
 }
 
