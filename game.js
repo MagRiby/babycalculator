@@ -412,6 +412,20 @@ function stopTimer() {
 function spawnConfetti() {
     const emojis = ['💖', '⭐', '✨', '💫', '🔥', '💜', '🖤', '💗', '🌟', '💕'];
     
+    // Random BABYMONSTER gif celebration
+    const gifs = [
+        'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXp4dmhucmoxcXRnZjZiNHZzbzEzZjFyOXRhbDljYmxoem1iZjR1OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y97iZVAYoSYfjnYxZY/giphy.gif',
+        'https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MTg3bGh2dnVwdXc1cmUxcTV1d2ZuMzRkdWEzdzQ5a2FrODl2MXlheSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/LN2JXGKWRYUft7eJ9w/giphy.gif',
+        'https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MTg3bGh2dnVwdXc1cmUxcTV1d2ZuMzRkdWEzdzQ5a2FrODl2MXlheSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/suAwqVyxWh9RyGk2iE/giphy.gif',
+        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdHlwbDJsMXBybjY3eDZhNmp3aHprMTNlejVubHhpNzU5d25icDFxdSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Ol96t6QvBO28UgHKdB/giphy.gif'
+    ];
+    
+    const gif = document.createElement('img');
+    gif.src = gifs[Math.floor(Math.random() * gifs.length)];
+    gif.className = 'celebration-gif';
+    document.body.appendChild(gif);
+    setTimeout(() => gif.remove(), 2000);
+    
     for (let i = 0; i < 20; i++) {
         setTimeout(() => {
             const confetti = document.createElement('div');
