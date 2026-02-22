@@ -112,11 +112,16 @@ const feedback = document.getElementById('feedback');
 const scoreEl = document.getElementById('score');
 const streakEl = document.getElementById('streak');
 const newGameBtn = document.getElementById('newGameBtn');
+const backBtn = document.getElementById('backBtn');
 const numButtons = document.querySelectorAll('.num-btn');
 const robot = document.getElementById('robot');
 const timerFill = document.getElementById('timerFill');
 const challengesPanel = document.getElementById('challengesPanel');
 const challengesList = document.getElementById('challengesList');
+const challengeModeLabel = document.getElementById('challengeModeLabel');
+const challengeTableNum = document.getElementById('challengeTableNum');
+const masteredPanel = document.getElementById('masteredPanel');
+const masteredList = document.getElementById('masteredList');
 
 let score = 0;
 let streak = 0;
@@ -131,45 +136,65 @@ const TIMER_DURATION = 11;
 let challenges = []; // Array of {n1, n2, answer}
 let currentIsChallenge = false;
 let currentChallengeIndex = -1;
+let challengeTableMode = 0; // 0 = normal mode, 6-9 = specific table
+let mastered = []; // Array of multipliers already mastered in challenge mode
+const tableButtons = document.querySelectorAll('.btn-table');
 
 // BABYMONSTER song references + Korean encouragement!
 const correctMessages = [
     'SHEESH! 🔥',
     'BATTER UP! ⚾',
     'FOREVER! 💜',
-    '대박! (Daebak!) 🌟',      // Amazing!
-    '잘했어! (Jalhesseo!) 💖',  // Well done!
-    '최고! (Chego!) 👑',       // The best!
-    '화이팅! (Hwaiting!) 💪',  // Fighting!
-    '완벽해! (Wanbyeokae!) ✨', // Perfect!
+    '대박! Daebak! Incroyable! 🌟',
+    '잘했어! Jalhesseo! Bien joué! 💖',
+    '최고! Chego! La meilleure! 👑',
+    '화이팅! Hwaiting! Courage! 💪',
+    '완벽해! Wanbyeokae! Parfait! ✨',
     'LIKE THAT! 💖',
     'CLIK CLIK CLIK! 📸',
-    '멋져! (Meotjyeo!) 🔥',    // Awesome!
-    '천재! (Cheonjae!) 🧠'     // Genius!
+    '멋져! Meotjyeo! Génial! 🔥',
+    '천재! Cheonjae! Génie! 🧠'
 ];
 const wrongMessages = [
-    '괜찮아~ (Gwaenchana~) 💭',  // It's okay~
-    '다시! (Dasi!) 🎤',          // Again!
-    '힘내! (Himnae!) 💪',        // Cheer up!
-    '아깝다~ (Akkapda~) 😅'      // So close~
+    '괜찮아~ Gwaenchana~ Ça va~ 💭',
+    '다시! Dasi! Encore! 🎤',
+    '힘내! Himnae! Courage! 💪',
+    '아깝다~ Akkapda~ Presque~ 😅'
 ];
 
 startBtn.addEventListener('click', () => {
     initAudio();
     playSound('start');
+    challengeTableMode = 0;
     startGame();
 });
+
+tableButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        initAudio();
+        playSound('start');
+        challengeTableMode = parseInt(btn.dataset.table);
+        startGame();
+    });
+});
 submitBtn.addEventListener('click', checkAnswer);
-newGameBtn.addEventListener('click', () => {
+newGameBtn.addEventListener('click', goToMenu);
+backBtn.addEventListener('click', goToMenu);
+
+function goToMenu() {
     stopTimer();
     settings.classList.remove('hidden');
     game.classList.add('hidden');
     newGameBtn.classList.add('hidden');
     challengesPanel.classList.remove('visible');
+    masteredPanel.classList.remove('visible');
+    challengeModeLabel.classList.add('hidden');
+    document.body.classList.remove('challenge-theme');
     score = 0;
     streak = 0;
     challenges = [];
-});
+    mastered = [];
+}
 
 numButtons.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -226,13 +251,25 @@ function startGame() {
     streak = 0;
     userInput = '';
     challenges = [];
+    mastered = [];
     updateChallengesPanel();
+    updateMasteredPanel();
     scoreEl.textContent = score;
     streakEl.textContent = streak;
     settings.classList.add('hidden');
     game.classList.remove('hidden');
     feedback.textContent = '';
     feedback.className = 'feedback';
+    
+    if (challengeTableMode > 0) {
+        challengeModeLabel.classList.remove('hidden');
+        challengeTableNum.textContent = challengeTableMode;
+        document.body.classList.add('challenge-theme');
+    } else {
+        challengeModeLabel.classList.add('hidden');
+        document.body.classList.remove('challenge-theme');
+    }
+    
     updateDisplay();
     generateQuestion();
 }
@@ -251,6 +288,25 @@ function generateQuestion() {
         currentIsChallenge = true;
         currentChallengeIndex = challengeIndex;
         highlightChallenge(challengeIndex);
+    } else if (challengeTableMode > 0) {
+        // Challenge table mode: fixed table, random multiplier 1-12 (skip mastered)
+        const remaining = [];
+        for (let i = 1; i <= 12; i++) {
+            if (!mastered.includes(i)) remaining.push(i);
+        }
+        
+        if (remaining.length === 0) {
+            // All mastered! TABLE MASTER celebration
+            stopTimer();
+            spawnTableMasterCelebration();
+            newGameBtn.classList.remove('hidden');
+            return;
+        }
+        
+        currentNum1 = challengeTableMode;
+        currentNum2 = remaining[Math.floor(Math.random() * remaining.length)];
+        currentAnswer = currentNum1 * currentNum2;
+        clearChallengeHighlight();
     } else {
         currentNum1 = Math.floor(Math.random() * maxNumber) + 1;
         currentNum2 = Math.floor(Math.random() * maxNumber) + 1;
@@ -305,6 +361,11 @@ function checkAnswer() {
         
         // Check if this was a challenge and remove it
         removeChallengeIfExists(currentNum1, currentNum2);
+        
+        // In challenge table mode, add to mastered
+        if (challengeTableMode > 0) {
+            addToMastered(currentNum2);
+        }
         
         spawnConfetti();
         
@@ -373,6 +434,26 @@ function updateChallengesPanel() {
     challengesPanel.classList.add('visible');
     challengesList.innerHTML = challenges.map(c => 
         `<div class="challenge-item">${c.n1}×${c.n2}</div>`
+    ).join('');
+}
+
+function addToMastered(multiplier) {
+    if (!mastered.includes(multiplier)) {
+        mastered.push(multiplier);
+        mastered.sort((a, b) => a - b);
+        updateMasteredPanel();
+    }
+}
+
+function updateMasteredPanel() {
+    if (mastered.length === 0 || challengeTableMode === 0) {
+        masteredPanel.classList.remove('visible');
+        return;
+    }
+    
+    masteredPanel.classList.add('visible');
+    masteredList.innerHTML = mastered.map(m => 
+        `<div class="mastered-item">${challengeTableMode}×${m}</div>`
     ).join('');
 }
 
@@ -451,4 +532,78 @@ function spawnConfetti() {
     bigText.textContent = ['SHEESH!', 'BATTER UP!', 'LIKE THAT!', '🔥 FIRE 🔥', 'CLIK CLIK!'][Math.floor(Math.random() * 5)];
     document.body.appendChild(bigText);
     setTimeout(() => bigText.remove(), 1200);
+}
+
+function spawnTableMasterCelebration() {
+    robot.className = 'robot happy';
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+    
+    // Create full-screen overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'master-overlay';
+    
+    overlay.innerHTML = `
+        <div class="master-badge">
+            <div class="master-crown">👑</div>
+            <div class="master-title">TABLE MASTER</div>
+            <div class="master-table">Table de ${challengeTableMode}</div>
+            <div class="master-subtitle">완벽해! Parfait!</div>
+            <div class="master-stars">⭐ ⭐ ⭐</div>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Multiple waves of confetti
+    for (let wave = 0; wave < 4; wave++) {
+        setTimeout(() => {
+            const emojis = ['👑', '🏆', '⭐', '🌟', '✨', '💫', '🔥', '💖', '💜', '🎉'];
+            for (let i = 0; i < 25; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = Math.random() * 100 + '%';
+                    confetti.style.setProperty('--tx', (Math.random() - 0.5) * 600 + 'px');
+                    confetti.style.setProperty('--ty', (Math.random() - 0.5) * 600 + 'px');
+                    confetti.style.setProperty('--rot', Math.random() * 720 - 360 + 'deg');
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 2500);
+                }, i * 20);
+            }
+        }, wave * 600);
+    }
+    
+    // Play victory sound sequence
+    playSound('correct');
+    setTimeout(() => playSound('correct'), 400);
+    setTimeout(() => playSound('start'), 800);
+    
+    // Show random gif
+    const gifs = [
+        'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXp4dmhucmoxcXRnZjZiNHZzbzEzZjFyOXRhbDljYmxoem1iZjR1OSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Y97iZVAYoSYfjnYxZY/giphy.gif',
+        'https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MTg3bGh2dnVwdXc1cmUxcTV1d2ZuMzRkdWEzdzQ5a2FrODl2MXlheSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/LN2JXGKWRYUft7eJ9w/giphy.gif',
+        'https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MTg3bGh2dnVwdXc1cmUxcTV1d2ZuMzRkdWEzdzQ5a2FrODl2MXlheSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/suAwqVyxWh9RyGk2iE/giphy.gif',
+        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdHlwbDJsMXBybjY3eDZhNmp3aHprMTNlejVubHhpNzU5d25icDFxdSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Ol96t6QvBO28UgHKdB/giphy.gif'
+    ];
+    const gif = document.createElement('img');
+    gif.src = gifs[Math.floor(Math.random() * gifs.length)];
+    gif.className = 'master-gif';
+    overlay.querySelector('.master-badge').appendChild(gif);
+    
+    // Remove overlay on tap
+    overlay.addEventListener('click', () => {
+        overlay.classList.add('master-fade-out');
+        setTimeout(() => overlay.remove(), 500);
+    });
+    
+    // Auto-remove after 6 seconds
+    setTimeout(() => {
+        if (overlay.parentNode) {
+            overlay.classList.add('master-fade-out');
+            setTimeout(() => overlay.remove(), 500);
+        }
+    }, 6000);
 }

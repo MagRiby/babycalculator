@@ -13,6 +13,11 @@
         <div class="corner-decor bl"></div>
         <div class="corner-decor br"></div>
         
+        <div class="mastered-panel" id="masteredPanel">
+            <div class="mastered-header">✅ Maîtrisé</div>
+            <div class="mastered-list" id="masteredList"></div>
+        </div>
+        
         <div class="challenges-panel" id="challengesPanel">
             <div class="challenges-header">🎯 Défis</div>
             <div class="challenges-list" id="challengesList"></div>
@@ -38,6 +43,18 @@
                 </select>
             </label>
             <button id="startBtn" class="btn btn-start">C'est parti !</button>
+            
+            <div class="mode-divider">— ou —</div>
+            
+            <div class="challenge-mode-section">
+                <div class="challenge-mode-title">🎯 Mode Défi</div>
+                <div class="challenge-table-buttons">
+                    <button class="btn btn-table" data-table="6">Table de 6</button>
+                    <button class="btn btn-table" data-table="7">Table de 7</button>
+                    <button class="btn btn-table" data-table="8">Table de 8</button>
+                    <button class="btn btn-table" data-table="9">Table de 9</button>
+                </div>
+            </div>
         </div>
 
         <div id="game" class="game hidden">
@@ -45,6 +62,8 @@
                 <span>Score : <span id="score">0</span></span>
                 <span>🔥 Série : <span id="streak">0</span></span>
             </div>
+            
+            <div id="challengeModeLabel" class="challenge-mode-label hidden">🎯 Défi : Table de <span id="challengeTableNum">6</span></div>
             
             <div class="timer-bar">
                 <div class="timer-fill" id="timerFill"></div>
@@ -76,6 +95,7 @@
             <button id="submitBtn" class="btn btn-submit">Vérifier !</button>
             
             <button id="newGameBtn" class="btn btn-new hidden">Nouvelle Partie</button>
+            <button id="backBtn" class="btn btn-back">⬅ Menu</button>
         </div>
     </div>
     
