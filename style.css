@@ -665,6 +665,19 @@ h1 {
     }
 }
 
+/* Side Panels Container */
+.side-panels {
+    display: none;
+    flex-direction: row;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+}
+
+.side-panels.visible {
+    display: flex;
+}
+
 .challenge-mode-label {
     font-size: 1rem;
     color: #fff;
@@ -687,21 +700,18 @@ h1 {
 
 /* Mastered Panel */
 .mastered-panel {
-    position: absolute;
-    top: 10px;
-    left: -75px;
-    width: 70px;
+    flex: 1;
+    max-width: 50%;
     background: rgba(20, 40, 20, 0.95);
     border: 2px solid #00ff88;
     border-radius: 10px;
-    padding: 8px;
+    padding: 6px;
     display: none;
     flex-direction: column;
-    gap: 6px;
-    max-height: 350px;
+    gap: 4px;
+    max-height: 120px;
     overflow-y: auto;
     box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
-    z-index: 10;
 }
 
 .mastered-panel.visible {
@@ -709,53 +719,51 @@ h1 {
 }
 
 .mastered-header {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #00ff88;
     text-align: center;
-    padding: 4px;
+    padding: 3px;
     border-bottom: 1px solid #00ff88;
 }
 
 .mastered-list {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
 }
 
 .mastered-item {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: #00ff88;
     background: rgba(0, 255, 136, 0.15);
-    padding: 8px 6px;
-    border-radius: 8px;
+    padding: 4px 6px;
+    border-radius: 6px;
     text-align: center;
-    border: 2px solid #00ff88;
+    border: 1px solid #00ff88;
     animation: mastered-appear 0.5s ease;
 }
 
 @keyframes mastered-appear {
-    0% { opacity: 0; transform: translateX(-20px) scale(0.5); }
-    60% { transform: translateX(5px) scale(1.1); }
-    100% { opacity: 1; transform: translateX(0) scale(1); }
+    0% { opacity: 0; transform: scale(0.5); }
+    60% { transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
 /* Challenges Panel */
 .challenges-panel {
-    position: absolute;
-    top: 10px;
-    right: -75px;
-    width: 70px;
+    flex: 1;
+    max-width: 50%;
     background: rgba(20, 20, 40, 0.95);
     border: 2px solid #ff00ff;
     border-radius: 10px;
-    padding: 8px;
+    padding: 6px;
     display: none;
     flex-direction: column;
-    gap: 6px;
-    max-height: 350px;
+    gap: 4px;
+    max-height: 120px;
     overflow-y: auto;
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
-    z-index: 10;
 }
 
 .challenges-panel.visible {
@@ -763,27 +771,28 @@ h1 {
 }
 
 .challenges-header {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: #ff00ff;
     text-align: center;
-    padding: 4px;
+    padding: 3px;
     border-bottom: 1px solid #ff00ff;
 }
 
 .challenges-list {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
 }
 
 .challenge-item {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: #fff;
     background: rgba(255, 0, 128, 0.2);
-    padding: 8px 6px;
-    border-radius: 8px;
+    padding: 4px 6px;
+    border-radius: 6px;
     text-align: center;
-    border: 2px solid #ff0080;
+    border: 1px solid #ff0080;
     animation: challenge-appear 0.3s ease;
     transition: all 0.3s ease;
 }
@@ -791,9 +800,8 @@ h1 {
 .challenge-item.active {
     background: rgba(255, 255, 0, 0.4);
     border-color: #ffff00;
-    transform: scale(1.25);
-    box-shadow: 0 0 20px rgba(255, 255, 0, 0.6);
-    z-index: 20;
+    transform: scale(1.2);
+    box-shadow: 0 0 15px rgba(255, 255, 0, 0.6);
 }
 
 .challenge-item.solved {

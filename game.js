@@ -122,6 +122,7 @@ const challengeModeLabel = document.getElementById('challengeModeLabel');
 const challengeTableNum = document.getElementById('challengeTableNum');
 const masteredPanel = document.getElementById('masteredPanel');
 const masteredList = document.getElementById('masteredList');
+const sidePanels = document.querySelector('.side-panels');
 
 let score = 0;
 let streak = 0;
@@ -188,6 +189,7 @@ function goToMenu() {
     newGameBtn.classList.add('hidden');
     challengesPanel.classList.remove('visible');
     masteredPanel.classList.remove('visible');
+    sidePanels.classList.remove('visible');
     challengeModeLabel.classList.add('hidden');
     document.body.classList.remove('challenge-theme');
     score = 0;
@@ -428,6 +430,7 @@ function removeChallengeIfExists(n1, n2) {
 function updateChallengesPanel() {
     if (challenges.length === 0) {
         challengesPanel.classList.remove('visible');
+        updateSidePanels();
         return;
     }
     
@@ -435,6 +438,7 @@ function updateChallengesPanel() {
     challengesList.innerHTML = challenges.map(c => 
         `<div class="challenge-item">${c.n1}×${c.n2}</div>`
     ).join('');
+    updateSidePanels();
 }
 
 function addToMastered(multiplier) {
@@ -448,6 +452,7 @@ function addToMastered(multiplier) {
 function updateMasteredPanel() {
     if (mastered.length === 0 || challengeTableMode === 0) {
         masteredPanel.classList.remove('visible');
+        updateSidePanels();
         return;
     }
     
@@ -455,6 +460,12 @@ function updateMasteredPanel() {
     masteredList.innerHTML = mastered.map(m => 
         `<div class="mastered-item">${challengeTableMode}×${m}</div>`
     ).join('');
+    updateSidePanels();
+}
+
+function updateSidePanels() {
+    const hasVisible = masteredPanel.classList.contains('visible') || challengesPanel.classList.contains('visible');
+    sidePanels.classList.toggle('visible', hasVisible);
 }
 
 function startTimer() {
