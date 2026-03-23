@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="50%" style="stop-color:#16213e"/>
+      <stop offset="100%" style="stop-color:#0a0a0a"/>
+    </linearGradient>
+    <linearGradient id="pink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff0080"/>
+      <stop offset="100%" style="stop-color:#ff00ff"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ffff"/>
+      <stop offset="100%" style="stop-color:#0080ff"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="180" height="180" rx="40" fill="url(#bg)"/>
+  <!-- Glow effects -->
+  <circle cx="40" cy="140" r="60" fill="#ff0080" opacity="0.15"/>
+  <circle cx="140" cy="40" r="60" fill="#00ffff" opacity="0.15"/>
+  <!-- Robot head -->
+  <!-- Antenna -->
+  <rect x="86" y="22" width="8" height="20" rx="4" fill="url(#pink)"/>
+  <circle cx="90" cy="18" r="8" fill="#00ffff"/>
+  <!-- Head -->
+  <rect x="55" y="45" width="70" height="55" rx="14" fill="#1a1a2e" stroke="#ff0080" stroke-width="3"/>
+  <!-- Eyes -->
+  <circle cx="75" cy="68" r="9" fill="#00ffff"/>
+  <circle cx="105" cy="68" r="9" fill="#00ffff"/>
+  <!-- Mouth (smile) -->
+  <path d="M78 82 Q90 95 102 82" fill="none" stroke="#ff0080" stroke-width="3" stroke-linecap="round"/>
+  <!-- Multiply symbol -->
+  <text x="90" y="135" text-anchor="middle" font-family="Arial Black" font-size="40" font-weight="bold" fill="url(#cyan)">×</text>
+  <!-- Stars -->
+  <text x="30" y="50" font-size="16">⭐</text>
+  <text x="140" y="145" font-size="16">✨</text>
+  <!-- BM text -->
+  <text x="90" y="168" text-anchor="middle" font-family="Arial Black" font-size="14" fill="#ff0080" letter-spacing="3">BM</text>
+</svg>

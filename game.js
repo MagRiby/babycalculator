@@ -1,3 +1,56 @@
+// === App Version - increment to force refresh on mobile ===
+const APP_VERSION = '2';
+const storedVersion = localStorage.getItem('bm_version');
+if (storedVersion && storedVersion !== APP_VERSION) {
+    localStorage.setItem('bm_version', APP_VERSION);
+    location.reload(true);
+} else {
+    localStorage.setItem('bm_version', APP_VERSION);
+}
+
+// === Score History (localStorage) ===
+function isDesktop() {
+    return window.innerWidth >= 900 && !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function saveSession(mode, finalScore, bestStreak) {
+    const history = JSON.parse(localStorage.getItem('bm_scores') || '[]');
+    history.unshift({
+        date: new Date().toISOString(),
+        mode: mode,
+        score: finalScore,
+        streak: bestStreak
+    });
+    // Keep last 50 sessions
+    if (history.length > 50) history.length = 50;
+    localStorage.setItem('bm_scores', JSON.stringify(history));
+    if (isDesktop()) renderHistory();
+}
+
+function renderHistory() {
+    const panel = document.getElementById('historyPanel');
+    if (!panel || !isDesktop()) return;
+    
+    const history = JSON.parse(localStorage.getItem('bm_scores') || '[]');
+    if (history.length === 0) {
+        panel.classList.add('hidden');
+        return;
+    }
+    
+    panel.classList.remove('hidden');
+    const list = document.getElementById('historyList');
+    list.innerHTML = history.map(h => {
+        const d = new Date(h.date);
+        const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+        const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        return `<div class="history-item">
+            <span class="history-date">${dateStr} ${timeStr}</span>
+            <span class="history-mode">${h.mode}</span>
+            <span class="history-score">Score: ${h.score} | 🔥${h.streak}</span>
+        </div>`;
+    }).join('');
+}
+
 // Audio context for sound effects
 let audioCtx = null;
 
@@ -126,6 +179,7 @@ const sidePanels = document.querySelector('.side-panels');
 
 let score = 0;
 let streak = 0;
+let bestStreak = 0;
 let currentAnswer = 0;
 let maxNumber = 10;
 let userInput = '';
@@ -140,6 +194,9 @@ let currentChallengeIndex = -1;
 let challengeTableMode = 0; // 0 = normal mode, 6-9 = specific table
 let mastered = []; // Array of multipliers already mastered in challenge mode
 const tableButtons = document.querySelectorAll('.btn-table');
+
+// Show history on desktop only
+if (isDesktop()) renderHistory();
 
 // BABYMONSTER song references + Korean encouragement!
 const correctMessages = [
@@ -184,6 +241,13 @@ backBtn.addEventListener('click', goToMenu);
 
 function goToMenu() {
     stopTimer();
+    
+    // Save session if player actually played
+    if (score > 0) {
+        const mode = challengeTableMode > 0 ? `Défi ×${challengeTableMode}` : `Tables 1-${maxNumber}`;
+        saveSession(mode, score, bestStreak);
+    }
+    
     settings.classList.remove('hidden');
     game.classList.add('hidden');
     newGameBtn.classList.add('hidden');
@@ -194,6 +258,7 @@ function goToMenu() {
     document.body.classList.remove('challenge-theme');
     score = 0;
     streak = 0;
+    bestStreak = 0;
     challenges = [];
     mastered = [];
 }
@@ -251,6 +316,7 @@ function startGame() {
     maxNumber = parseInt(maxNumberSelect.value);
     score = 0;
     streak = 0;
+    bestStreak = 0;
     userInput = '';
     challenges = [];
     mastered = [];
@@ -300,6 +366,7 @@ function generateQuestion() {
         if (remaining.length === 0) {
             // All mastered! TABLE MASTER celebration
             stopTimer();
+            saveSession(`Défi ×${challengeTableMode} ✅`, score, bestStreak);
             spawnTableMasterCelebration();
             newGameBtn.classList.remove('hidden');
             return;
@@ -356,6 +423,7 @@ function checkAnswer() {
         setTimeout(() => robot.className = 'robot', 800);
         score++;
         streak++;
+        if (streak > bestStreak) bestStreak = streak;
         scoreEl.textContent = score;
         streakEl.textContent = streak;
         feedback.textContent = correctMessages[Math.floor(Math.random() * correctMessages.length)];

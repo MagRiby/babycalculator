@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BABYMONSTER Maths!</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ff0080">
 </head>
 <body>
     <div class="container">
@@ -101,5 +106,10 @@
     </div>
     
     <script src="game.js"></script>
+    
+    <div class="history-panel hidden" id="historyPanel">
+        <div class="history-header">📊 Historique des scores</div>
+        <div class="history-list" id="historyList"></div>
+    </div>
 </body>
 </html>

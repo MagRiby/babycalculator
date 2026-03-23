@@ -972,6 +972,64 @@ body.challenge-theme .feedback.correct {
     text-shadow: 0 0 20px #ffd700;
 }
 
+/* History Panel - Desktop only */
+.history-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 280px;
+    max-height: 80vh;
+    background: linear-gradient(145deg, rgba(20, 20, 30, 0.95), rgba(30, 30, 50, 0.95));
+    border: 2px solid #ff0080;
+    border-radius: 15px;
+    padding: 15px;
+    overflow-y: auto;
+    z-index: 50;
+    box-shadow: 0 0 30px rgba(255, 0, 128, 0.3);
+}
+
+.history-header {
+    font-size: 1rem;
+    color: #00ffff;
+    text-align: center;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ff0080;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.history-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    background: rgba(255, 0, 128, 0.1);
+    border: 1px solid rgba(255, 0, 128, 0.3);
+    border-radius: 8px;
+    font-size: 0.75rem;
+}
+
+.history-date {
+    color: #888;
+    font-size: 0.65rem;
+}
+
+.history-mode {
+    color: #ff0080;
+    font-weight: bold;
+}
+
+.history-score {
+    color: #00ffff;
+}
+
 /* Table Master Celebration */
 .master-overlay {
     position: fixed;
