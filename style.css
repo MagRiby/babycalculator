@@ -989,101 +989,128 @@ h1 {
 .corner-decor.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
 .corner-decor.br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
 
-/* Tablet (iPad) - keep compact to fit screen without scrolling */
+/* Tablet (iPad) portrait - fit everything on screen */
 @media (min-width: 600px) and (max-width: 1024px) {
     body {
-        align-items: center;
-        padding: 8px;
+        align-items: flex-start;
+        padding: 6px;
+    }
+    
+    .container {
+        max-width: 440px;
+        padding: 10px 12px;
+    }
+    
+    h1 { font-size: 1.2rem; margin-bottom: 4px; }
+    .logo { font-size: 0.7rem; letter-spacing: 4px; margin-bottom: 2px; }
+    
+    .robot { margin: 3px 0; }
+    .robot-head { width: 50px; height: 40px; gap: 14px; }
+    .robot-eye { width: 10px; height: 10px; }
+    .robot-mouth { width: 16px; height: 3px; bottom: 7px; }
+    .robot-antenna { width: 4px; height: 12px; }
+    .robot-antenna::after { width: 10px; height: 10px; top: -8px; }
+    
+    .game { gap: 4px; }
+    
+    .question { font-size: 1.8rem; padding: 8px 16px; }
+    .answer-display { font-size: 1.5rem; padding: 6px; min-height: 36px; }
+    
+    .num-btn { font-size: 1.3rem; padding: 10px; }
+    .numpad { gap: 5px; max-width: 270px; }
+    
+    .btn { font-size: 1rem; padding: 10px 24px; }
+    .btn-submit { padding: 8px 24px; margin-top: 3px; }
+    .btn-back { font-size: 0.75rem; padding: 5px 14px; margin-top: 2px; }
+    .btn-start { font-size: 1rem; padding: 10px 24px; }
+    .btn-new { margin-top: 5px; }
+    
+    .score-board { font-size: 0.85rem; }
+    .feedback { font-size: 0.95rem; min-height: 22px; padding: 2px; }
+    
+    .challenge-mode-label { font-size: 0.85rem; padding: 4px 12px; }
+    .global-timer-bar { height: 10px; }
+    .global-timer-text { font-size: 0.55rem; }
+    .timer-bar { height: 6px; }
+    
+    .end-title { font-size: 1.2rem; }
+    .end-stat-label { font-size: 0.85rem; }
+    .end-stat-value { font-size: 0.9rem; }
+    .end-stars { font-size: 2rem; padding: 2px; }
+    .end-screen { gap: 8px; padding: 4px 0; }
+    .end-stat { padding: 6px 10px; }
+    
+    .settings label { font-size: 0.9rem; }
+    .settings select { font-size: 1rem; padding: 8px 14px; }
+    .settings { gap: 8px; }
+    .btn-table { font-size: 0.85rem; padding: 8px; }
+    .btn-round { font-size: 0.75rem; padding: 6px 14px; }
+    .challenge-mode-title { font-size: 0.9rem; }
+    .mode-divider { font-size: 0.8rem; }
+    
+    .side-panels { gap: 5px; }
+    .mastered-panel, .challenges-panel { max-height: 70px; padding: 4px; }
+    .mastered-header, .challenges-header { font-size: 0.55rem; padding: 2px; }
+    .mastered-item, .challenge-item { font-size: 0.55rem; padding: 2px 4px; }
+}
+
+/* iPad landscape - much more compact to fit short viewport */
+@media (min-width: 600px) and (max-width: 1024px) and (orientation: landscape) {
+    body {
+        padding: 4px;
     }
     
     .container {
         max-width: 480px;
-        padding: 12px 15px;
+        padding: 6px 10px;
     }
     
-    h1 { font-size: 1.5rem; margin-bottom: 6px; }
-    .logo { font-size: 0.85rem; letter-spacing: 5px; margin-bottom: 3px; }
+    h1 { font-size: 1rem; margin-bottom: 2px; }
+    .logo { font-size: 0.6rem; margin-bottom: 1px; }
+    .robot { margin: 1px 0; }
+    .robot-head { width: 36px; height: 28px; gap: 10px; border-width: 2px; }
+    .robot-eye { width: 7px; height: 7px; }
+    .robot-mouth { width: 12px; height: 2px; bottom: 5px; }
+    .robot-antenna { width: 3px; height: 8px; }
+    .robot-antenna::after { width: 7px; height: 7px; top: -6px; }
     
-    .robot { margin: 4px 0; }
-    .robot-head { width: 60px; height: 45px; gap: 16px; }
-    .robot-eye { width: 12px; height: 12px; }
-    .robot-mouth { width: 18px; height: 4px; bottom: 8px; }
-    .robot-antenna { width: 5px; height: 14px; }
-    .robot-antenna::after { width: 12px; height: 12px; top: -9px; }
+    .game { gap: 2px; }
+    .question { font-size: 1.5rem; padding: 4px 12px; }
+    .answer-display { font-size: 1.3rem; padding: 4px; min-height: 30px; }
     
-    .game { gap: 5px; }
+    .num-btn { font-size: 1.1rem; padding: 6px; }
+    .numpad { gap: 3px; max-width: 230px; }
     
-    .question { font-size: 2.2rem; padding: 10px 20px; }
-    .answer-display { font-size: 1.8rem; padding: 8px; min-height: 42px; }
+    .btn { font-size: 0.85rem; padding: 6px 18px; }
+    .btn-submit { padding: 6px 18px; margin-top: 2px; }
+    .btn-back { font-size: 0.7rem; padding: 4px 12px; margin-top: 1px; }
     
-    .num-btn { font-size: 1.5rem; padding: 12px; }
-    .numpad { gap: 6px; max-width: 300px; }
+    .score-board { font-size: 0.75rem; }
+    .feedback { font-size: 0.8rem; min-height: 18px; padding: 1px; }
+    .timer-bar { height: 5px; }
+    .global-timer-bar { height: 8px; }
+    .global-timer-text { font-size: 0.5rem; }
+    .challenge-mode-label { font-size: 0.75rem; padding: 3px 10px; }
     
-    .btn { font-size: 1.1rem; padding: 12px 30px; }
-    .btn-submit { padding: 10px 30px; }
-    .btn-back { font-size: 0.85rem; padding: 6px 18px; }
+    .settings { gap: 6px; }
+    .settings label { font-size: 0.8rem; }
+    .settings select { font-size: 0.9rem; padding: 6px 10px; }
+    .btn-table { font-size: 0.75rem; padding: 6px; }
+    .btn-round { font-size: 0.7rem; padding: 5px 12px; }
+    .challenge-mode-title { font-size: 0.8rem; }
+    .mode-divider { font-size: 0.7rem; }
     
-    .score-board { font-size: 1rem; }
-    .feedback { font-size: 1.1rem; min-height: 25px; padding: 3px; }
+    .side-panels { gap: 3px; }
+    .mastered-panel, .challenges-panel { max-height: 50px; }
+    .mastered-header, .challenges-header { font-size: 0.5rem; }
+    .mastered-item, .challenge-item { font-size: 0.5rem; padding: 2px 3px; }
     
-    .challenge-mode-label { font-size: 1rem; padding: 5px 15px; }
-    .global-timer-bar { height: 12px; }
-    .global-timer-text { font-size: 0.6rem; }
-    .timer-bar { height: 8px; }
-    
-    .end-title { font-size: 1.5rem; }
-    .end-stat-label { font-size: 0.95rem; }
-    .end-stat-value { font-size: 1rem; }
-    .end-stars { font-size: 2.5rem; padding: 3px; }
-    .end-screen { gap: 10px; padding: 5px 0; }
-    
-    .settings label { font-size: 1rem; }
-    .settings select { font-size: 1.1rem; }
-    .settings { gap: 10px; }
-    .btn-table { font-size: 0.95rem; padding: 10px; }
-    .btn-round { font-size: 0.85rem; padding: 8px 18px; }
-    
-    .side-panels { gap: 6px; }
-    .mastered-panel, .challenges-panel { max-height: 80px; padding: 4px; }
-    .mastered-header, .challenges-header { font-size: 0.6rem; padding: 2px; }
-    .mastered-item, .challenge-item { font-size: 0.6rem; padding: 3px 5px; }
-}
-
-/* iPad landscape - even more compact */
-@media (min-width: 600px) and (max-width: 1024px) and (orientation: landscape) {
-    .container {
-        max-width: 520px;
-        padding: 8px 15px;
-    }
-    
-    h1 { font-size: 1.2rem; margin-bottom: 3px; }
-    .logo { font-size: 0.7rem; margin-bottom: 2px; }
-    .robot { margin: 2px 0; }
-    .robot-head { width: 45px; height: 35px; gap: 12px; }
-    .robot-eye { width: 9px; height: 9px; }
-    .robot-mouth { width: 14px; height: 3px; bottom: 6px; }
-    .robot-antenna { width: 4px; height: 10px; }
-    .robot-antenna::after { width: 9px; height: 9px; top: -7px; }
-    
-    .game { gap: 3px; }
-    .question { font-size: 1.8rem; padding: 6px 15px; }
-    .answer-display { font-size: 1.5rem; padding: 5px; min-height: 35px; }
-    
-    .num-btn { font-size: 1.2rem; padding: 8px; }
-    .numpad { gap: 4px; max-width: 260px; }
-    
-    .btn { font-size: 0.95rem; padding: 8px 22px; }
-    .btn-submit { padding: 8px 22px; }
-    .btn-back { font-size: 0.75rem; padding: 5px 14px; }
-    
-    .score-board { font-size: 0.85rem; }
-    .feedback { font-size: 0.9rem; min-height: 20px; padding: 2px; }
-    .timer-bar { height: 6px; }
-    .global-timer-bar { height: 10px; }
-    
-    .settings { gap: 8px; }
-    .side-panels { gap: 4px; }
-    .mastered-panel, .challenges-panel { max-height: 60px; }
+    .end-screen { gap: 5px; padding: 2px 0; }
+    .end-title { font-size: 1rem; }
+    .end-stat { padding: 4px 8px; }
+    .end-stat-label { font-size: 0.75rem; }
+    .end-stat-value { font-size: 0.8rem; }
+    .end-stars { font-size: 1.5rem; padding: 1px; }
 }
 
 /* Challenge Mode Theme */

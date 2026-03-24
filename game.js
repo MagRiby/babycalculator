@@ -1,5 +1,5 @@
 // === App Version - increment to force refresh on mobile ===
-const APP_VERSION = '3';
+const APP_VERSION = '4';
 const storedVersion = localStorage.getItem('bm_version');
 if (storedVersion && storedVersion !== APP_VERSION) {
     localStorage.setItem('bm_version', APP_VERSION);
