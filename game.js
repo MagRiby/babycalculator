@@ -13,6 +13,38 @@ function isDesktop() {
     return window.innerWidth >= 900 && !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
+function trackError(n1, n2) {
+    const errors = JSON.parse(localStorage.getItem('bm_errors') || '{}');
+    const key = `${n1}x${n2}`;
+    errors[key] = (errors[key] || 0) + 1;
+    localStorage.setItem('bm_errors', JSON.stringify(errors));
+}
+
+function getStruggleTables() {
+    const errors = JSON.parse(localStorage.getItem('bm_errors') || '{}');
+    if (Object.keys(errors).length === 0) return null;
+    
+    // Count errors per table
+    const tableCounts = {};
+    for (const [key, count] of Object.entries(errors)) {
+        const [a, b] = key.split('x').map(Number);
+        tableCounts[a] = (tableCounts[a] || 0) + count;
+        if (a !== b) tableCounts[b] = (tableCounts[b] || 0) + count;
+    }
+    
+    // Top 3 hardest tables
+    const tables = Object.entries(tableCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
+    
+    // Top 5 hardest specific multiplications
+    const hardest = Object.entries(errors)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+    
+    return { tables, hardest };
+}
+
 function saveSession(mode, finalScore, bestStreak) {
     const history = JSON.parse(localStorage.getItem('bm_scores') || '[]');
     history.unshift({
@@ -32,23 +64,46 @@ function renderHistory() {
     if (!panel || !isDesktop()) return;
     
     const history = JSON.parse(localStorage.getItem('bm_scores') || '[]');
-    if (history.length === 0) {
-        panel.classList.add('hidden');
-        return;
-    }
     
     panel.classList.remove('hidden');
     const list = document.getElementById('historyList');
-    list.innerHTML = history.map(h => {
-        const d = new Date(h.date);
-        const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
-        const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        return `<div class="history-item">
-            <span class="history-date">${dateStr} ${timeStr}</span>
-            <span class="history-mode">${h.mode}</span>
-            <span class="history-score">Score: ${h.score} | 🔥${h.streak}</span>
-        </div>`;
-    }).join('');
+    
+    let html = '';
+    
+    // Struggle analysis
+    const struggle = getStruggleTables();
+    if (struggle) {
+        html += '<div class="struggle-section">';
+        html += '<div class="struggle-title">😰 Tables difficiles</div>';
+        html += '<div class="struggle-tags">';
+        struggle.tables.forEach(([table, count]) => {
+            html += `<span class="struggle-tag">×${table} <small>(${count})</small></span>`;
+        });
+        html += '</div>';
+        html += '<div class="struggle-subtitle">Multiplications les plus ratées</div>';
+        html += '<div class="struggle-tags">';
+        struggle.hardest.forEach(([key, count]) => {
+            html += `<span class="struggle-tag hard">${key.replace('x', '×')} <small>(${count})</small></span>`;
+        });
+        html += '</div></div>';
+    }
+    
+    if (history.length === 0) {
+        html += '<div class="history-empty">Aucune session encore. Joue une partie !</div>';
+    } else {
+        html += history.map(h => {
+            const d = new Date(h.date);
+            const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+            const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            return `<div class="history-item">
+                <span class="history-date">${dateStr} ${timeStr}</span>
+                <span class="history-mode">${h.mode}</span>
+                <span class="history-score">Score: ${h.score} | 🔥${h.streak}</span>
+            </div>`;
+        }).join('');
+    }
+    
+    list.innerHTML = html;
 }
 
 // Audio context for sound effects
@@ -195,6 +250,29 @@ let challengeTableMode = 0; // 0 = normal mode, 6-9 = specific table
 let mastered = []; // Array of multipliers already mastered in challenge mode
 const tableButtons = document.querySelectorAll('.btn-table');
 
+// Round mode
+let totalQuestions = 10;
+let currentQuestion = 0;
+let correctAnswers = 0;
+let globalTimer = null;
+let globalTimeLeft = 0;
+const TIME_PER_10 = 90; // 1:30 per 10 questions
+const roundButtons = document.querySelectorAll('.btn-round');
+const questionCounter = document.getElementById('questionCounter');
+const currentQEl = document.getElementById('currentQ');
+const totalQEl = document.getElementById('totalQ');
+const globalTimerBar = document.getElementById('globalTimerBar');
+const globalTimerFill = document.getElementById('globalTimerFill');
+const globalTimerText = document.getElementById('globalTimerText');
+const endScreen = document.getElementById('endScreen');
+const endTitle = document.getElementById('endTitle');
+const endScore = document.getElementById('endScore');
+const endCorrect = document.getElementById('endCorrect');
+const endStreak = document.getElementById('endStreak');
+const endStars = document.getElementById('endStars');
+const replayBtn = document.getElementById('replayBtn');
+const endMenuBtn = document.getElementById('endMenuBtn');
+
 // Show history on desktop only
 if (isDesktop()) renderHistory();
 
@@ -239,8 +317,29 @@ submitBtn.addEventListener('click', checkAnswer);
 newGameBtn.addEventListener('click', goToMenu);
 backBtn.addEventListener('click', goToMenu);
 
+roundButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        roundButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        totalQuestions = parseInt(btn.dataset.rounds);
+    });
+});
+
+replayBtn.addEventListener('click', () => {
+    endScreen.classList.add('hidden');
+    initAudio();
+    playSound('start');
+    startGame();
+});
+
+endMenuBtn.addEventListener('click', () => {
+    endScreen.classList.add('hidden');
+    goToMenu();
+});
+
 function goToMenu() {
     stopTimer();
+    stopGlobalTimer();
     
     // Save session if player actually played
     if (score > 0) {
@@ -250,15 +349,20 @@ function goToMenu() {
     
     settings.classList.remove('hidden');
     game.classList.add('hidden');
+    endScreen.classList.add('hidden');
     newGameBtn.classList.add('hidden');
     challengesPanel.classList.remove('visible');
     masteredPanel.classList.remove('visible');
     sidePanels.classList.remove('visible');
     challengeModeLabel.classList.add('hidden');
+    questionCounter.classList.add('hidden');
+    globalTimerBar.classList.add('hidden');
     document.body.classList.remove('challenge-theme');
     score = 0;
     streak = 0;
     bestStreak = 0;
+    currentQuestion = 0;
+    correctAnswers = 0;
     challenges = [];
     mastered = [];
 }
@@ -318,6 +422,8 @@ function startGame() {
     streak = 0;
     bestStreak = 0;
     userInput = '';
+    currentQuestion = 0;
+    correctAnswers = 0;
     challenges = [];
     mastered = [];
     updateChallengesPanel();
@@ -325,6 +431,7 @@ function startGame() {
     scoreEl.textContent = score;
     streakEl.textContent = streak;
     settings.classList.add('hidden');
+    endScreen.classList.add('hidden');
     game.classList.remove('hidden');
     feedback.textContent = '';
     feedback.className = 'feedback';
@@ -333,9 +440,19 @@ function startGame() {
         challengeModeLabel.classList.remove('hidden');
         challengeTableNum.textContent = challengeTableMode;
         document.body.classList.add('challenge-theme');
+        questionCounter.classList.add('hidden');
+        globalTimerBar.classList.add('hidden');
     } else {
         challengeModeLabel.classList.add('hidden');
         document.body.classList.remove('challenge-theme');
+        // Show round info
+        questionCounter.classList.remove('hidden');
+        totalQEl.textContent = totalQuestions;
+        currentQEl.textContent = '1';
+        // Start global timer
+        globalTimerBar.classList.remove('hidden');
+        globalTimeLeft = (totalQuestions / 10) * TIME_PER_10;
+        startGlobalTimer();
     }
     
     updateDisplay();
@@ -423,6 +540,7 @@ function checkAnswer() {
         setTimeout(() => robot.className = 'robot', 800);
         score++;
         streak++;
+        correctAnswers++;
         if (streak > bestStreak) bestStreak = streak;
         scoreEl.textContent = score;
         streakEl.textContent = streak;
@@ -439,9 +557,98 @@ function checkAnswer() {
         
         spawnConfetti();
         
-        setTimeout(generateQuestion, 800);
+        setTimeout(() => advanceQuestion(), 800);
     } else {
         handleWrongAnswer();
+    }
+}
+
+function advanceQuestion() {
+    if (challengeTableMode === 0) {
+        currentQuestion++;
+        currentQEl.textContent = Math.min(currentQuestion + 1, totalQuestions);
+        
+        if (currentQuestion >= totalQuestions) {
+            endRound();
+            return;
+        }
+    }
+    generateQuestion();
+}
+
+function endRound() {
+    stopTimer();
+    stopGlobalTimer();
+    
+    const mode = challengeTableMode > 0 ? `Défi ×${challengeTableMode}` : `Tables 1-${maxNumber} (${totalQuestions}Q)`;
+    saveSession(mode, score, bestStreak);
+    
+    // Show end screen
+    game.classList.add('hidden');
+    endScreen.classList.remove('hidden');
+    
+    endScore.textContent = score;
+    endCorrect.textContent = `${correctAnswers}/${totalQuestions}`;
+    endStreak.textContent = `🔥 ${bestStreak}`;
+    
+    // Stars based on percentage
+    const pct = correctAnswers / totalQuestions;
+    if (pct >= 0.9) {
+        endTitle.textContent = '완벽해! Parfait!';
+        endStars.textContent = '⭐⭐⭐';
+        spawnConfetti();
+        setTimeout(() => spawnConfetti(), 400);
+    } else if (pct >= 0.7) {
+        endTitle.textContent = '잘했어! Bien joué!';
+        endStars.textContent = '⭐⭐';
+        spawnConfetti();
+    } else if (pct >= 0.5) {
+        endTitle.textContent = '힘내! Courage!';
+        endStars.textContent = '⭐';
+    } else {
+        endTitle.textContent = '다시! On recommence!';
+        endStars.textContent = '';
+    }
+}
+
+function startGlobalTimer() {
+    updateGlobalTimerDisplay();
+    globalTimer = setInterval(() => {
+        globalTimeLeft -= 1;
+        updateGlobalTimerDisplay();
+        
+        if (globalTimeLeft <= 0) {
+            stopGlobalTimer();
+            stopTimer();
+            feedback.textContent = '⏰ TEMPS ÉCOULÉ!';
+            feedback.className = 'feedback wrong';
+            setTimeout(() => endRound(), 1000);
+        }
+    }, 1000);
+}
+
+function stopGlobalTimer() {
+    if (globalTimer) {
+        clearInterval(globalTimer);
+        globalTimer = null;
+    }
+}
+
+function updateGlobalTimerDisplay() {
+    const totalTime = (totalQuestions / 10) * TIME_PER_10;
+    const pct = (globalTimeLeft / totalTime) * 100;
+    globalTimerFill.style.width = pct + '%';
+    
+    const mins = Math.floor(globalTimeLeft / 60);
+    const secs = globalTimeLeft % 60;
+    globalTimerText.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    
+    if (globalTimeLeft <= 15) {
+        globalTimerFill.className = 'global-timer-fill critical';
+    } else if (globalTimeLeft <= 30) {
+        globalTimerFill.className = 'global-timer-fill warning';
+    } else {
+        globalTimerFill.className = 'global-timer-fill';
     }
 }
 
@@ -454,10 +661,13 @@ function handleWrongAnswer() {
     feedback.textContent = wrongMessages[Math.floor(Math.random() * wrongMessages.length)] + ` (${currentAnswer})`;
     feedback.className = 'feedback wrong';
     
+    // Track error for struggle analysis
+    trackError(currentNum1, currentNum2);
+    
     // Add to challenges if not already there
     addToChallenge(currentNum1, currentNum2, currentAnswer);
     
-    setTimeout(generateQuestion, 1500);
+    setTimeout(() => advanceQuestion(), 1500);
 }
 
 function addToChallenge(n1, n2, answer) {

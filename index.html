@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>BABYMONSTER Maths!</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.png">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -37,6 +37,10 @@
                     <option value="12">12</option>
                 </select>
             </label>
+            <div class="round-select">
+                <button class="btn btn-round selected" data-rounds="10">10 questions</button>
+                <button class="btn btn-round" data-rounds="20">20 questions</button>
+            </div>
             <button id="startBtn" class="btn btn-start">C'est parti !</button>
             
             <div class="mode-divider">— ou —</div>
@@ -55,7 +59,13 @@
         <div id="game" class="game hidden">
             <div class="score-board">
                 <span>Score : <span id="score">0</span></span>
+                <span id="questionCounter" class="question-counter hidden">Q: <span id="currentQ">1</span>/<span id="totalQ">10</span></span>
                 <span>🔥 Série : <span id="streak">0</span></span>
+            </div>
+            
+            <div id="globalTimerBar" class="global-timer-bar hidden">
+                <div class="global-timer-fill" id="globalTimerFill"></div>
+                <span class="global-timer-text" id="globalTimerText">1:30</span>
             </div>
             
             <div id="challengeModeLabel" class="challenge-mode-label hidden">🎯 Défi : Table de <span id="challengeTableNum">6</span></div>
@@ -103,13 +113,34 @@
             <button id="newGameBtn" class="btn btn-new hidden">Nouvelle Partie</button>
             <button id="backBtn" class="btn btn-back">⬅ Menu</button>
         </div>
+        
+        <div id="endScreen" class="end-screen hidden">
+            <div class="end-title" id="endTitle">Partie terminée !</div>
+            <div class="end-stats">
+                <div class="end-stat">
+                    <span class="end-stat-label">Score</span>
+                    <span class="end-stat-value" id="endScore">0</span>
+                </div>
+                <div class="end-stat">
+                    <span class="end-stat-label">Bonnes réponses</span>
+                    <span class="end-stat-value" id="endCorrect">0/10</span>
+                </div>
+                <div class="end-stat">
+                    <span class="end-stat-label">Meilleure série</span>
+                    <span class="end-stat-value" id="endStreak">🔥 0</span>
+                </div>
+            </div>
+            <div class="end-stars" id="endStars"></div>
+            <button id="replayBtn" class="btn btn-start">Rejouer</button>
+            <button id="endMenuBtn" class="btn btn-back">⬅ Menu</button>
+        </div>
     </div>
-    
-    <script src="game.js"></script>
     
     <div class="history-panel hidden" id="historyPanel">
         <div class="history-header">📊 Historique des scores</div>
         <div class="history-list" id="historyList"></div>
     </div>
+    
+    <script src="game.js"></script>
 </body>
 </html>
