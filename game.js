@@ -1,5 +1,5 @@
 // === App Version - increment to force refresh on mobile ===
-const APP_VERSION = '4';
+const APP_VERSION = '5';
 const storedVersion = localStorage.getItem('bm_version');
 if (storedVersion && storedVersion !== APP_VERSION) {
     localStorage.setItem('bm_version', APP_VERSION);
@@ -18,6 +18,8 @@ function trackError(n1, n2) {
     const key = `${n1}x${n2}`;
     errors[key] = (errors[key] || 0) + 1;
     localStorage.setItem('bm_errors', JSON.stringify(errors));
+    // Sync to Firebase
+    syncErrorsToFirebase(errors);
 }
 
 function getStruggleTables() {
@@ -46,16 +48,22 @@ function getStruggleTables() {
 }
 
 function saveSession(mode, finalScore, bestStreak) {
-    const history = JSON.parse(localStorage.getItem('bm_scores') || '[]');
-    history.unshift({
+    const session = {
         date: new Date().toISOString(),
         mode: mode,
         score: finalScore,
         streak: bestStreak
-    });
-    // Keep last 50 sessions
+    };
+    
+    // Save locally
+    const history = JSON.parse(localStorage.getItem('bm_scores') || '[]');
+    history.unshift(session);
     if (history.length > 50) history.length = 50;
     localStorage.setItem('bm_scores', JSON.stringify(history));
+    
+    // Sync to Firebase
+    pushSessionToFirebase(session);
+    
     if (isDesktop()) renderHistory();
 }
 
@@ -63,32 +71,72 @@ function renderHistory() {
     const panel = document.getElementById('historyPanel');
     if (!panel || !isDesktop()) return;
     
-    const history = JSON.parse(localStorage.getItem('bm_scores') || '[]');
-    
     panel.classList.remove('hidden');
     const list = document.getElementById('historyList');
     
+    // If Firebase is available, load from there (all devices' scores)
+    if (typeof firebaseDB !== 'undefined' && firebaseDB) {
+        renderHistoryFromFirebase(panel, list);
+        return;
+    }
+    
+    // Fallback: local only
+    renderHistoryLocal(list);
+}
+
+function renderHistoryLocal(list) {
+    const history = JSON.parse(localStorage.getItem('bm_scores') || '[]');
+    const errors = JSON.parse(localStorage.getItem('bm_errors') || '{}');
+    list.innerHTML = buildHistoryHTML(history, errors);
+}
+
+function renderHistoryFromFirebase(panel, list) {
+    list.innerHTML = '<div class="history-empty">Chargement...</div>';
+    
+    // Listen for real-time updates on scores
+    firebaseDB.ref('scores').orderByChild('date').limitToLast(50).on('value', snap => {
+        const sessions = [];
+        snap.forEach(child => sessions.push(child.val()));
+        sessions.reverse(); // newest first
+        
+        // Also get errors
+        firebaseDB.ref('errors').once('value', errSnap => {
+            const errors = errSnap.val() || {};
+            list.innerHTML = buildHistoryHTML(sessions, errors);
+        });
+    });
+}
+
+function buildHistoryHTML(history, errors) {
     let html = '';
     
-    // Struggle analysis
-    const struggle = getStruggleTables();
-    if (struggle) {
+    // Struggle analysis from errors object
+    if (errors && Object.keys(errors).length > 0) {
+        const tableCounts = {};
+        for (const [key, count] of Object.entries(errors)) {
+            const [a, b] = key.split('x').map(Number);
+            tableCounts[a] = (tableCounts[a] || 0) + count;
+            if (a !== b) tableCounts[b] = (tableCounts[b] || 0) + count;
+        }
+        const tables = Object.entries(tableCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+        const hardest = Object.entries(errors).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        
         html += '<div class="struggle-section">';
         html += '<div class="struggle-title">😰 Tables difficiles</div>';
         html += '<div class="struggle-tags">';
-        struggle.tables.forEach(([table, count]) => {
+        tables.forEach(([table, count]) => {
             html += `<span class="struggle-tag">×${table} <small>(${count})</small></span>`;
         });
         html += '</div>';
         html += '<div class="struggle-subtitle">Multiplications les plus ratées</div>';
         html += '<div class="struggle-tags">';
-        struggle.hardest.forEach(([key, count]) => {
+        hardest.forEach(([key, count]) => {
             html += `<span class="struggle-tag hard">${key.replace('x', '×')} <small>(${count})</small></span>`;
         });
         html += '</div></div>';
     }
     
-    if (history.length === 0) {
+    if (!history || history.length === 0) {
         html += '<div class="history-empty">Aucune session encore. Joue une partie !</div>';
     } else {
         html += history.map(h => {
@@ -103,7 +151,35 @@ function renderHistory() {
         }).join('');
     }
     
-    list.innerHTML = html;
+    return html;
+}
+
+// === Firebase Sync Functions ===
+function pushSessionToFirebase(session) {
+    if (typeof firebaseDB === 'undefined' || !firebaseDB) return;
+    try {
+        firebaseDB.ref('scores').push(session);
+    } catch (e) {
+        console.warn('Firebase push failed:', e);
+    }
+}
+
+function syncErrorsToFirebase(localErrors) {
+    if (typeof firebaseDB === 'undefined' || !firebaseDB) return;
+    try {
+        // Merge with existing Firebase errors (increment, don't overwrite)
+        firebaseDB.ref('errors').once('value', snap => {
+            const remote = snap.val() || {};
+            const merged = { ...remote };
+            for (const [key, count] of Object.entries(localErrors)) {
+                // Use the max of local and remote to avoid double-counting
+                merged[key] = Math.max(merged[key] || 0, count);
+            }
+            firebaseDB.ref('errors').set(merged);
+        });
+    } catch (e) {
+        console.warn('Firebase error sync failed:', e);
+    }
 }
 
 // Audio context for sound effects
