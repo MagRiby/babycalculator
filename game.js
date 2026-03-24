@@ -1,5 +1,5 @@
 // === App Version - increment to force refresh on mobile ===
-const APP_VERSION = '2';
+const APP_VERSION = '3';
 const storedVersion = localStorage.getItem('bm_version');
 if (storedVersion && storedVersion !== APP_VERSION) {
     localStorage.setItem('bm_version', APP_VERSION);
@@ -10,7 +10,7 @@ if (storedVersion && storedVersion !== APP_VERSION) {
 
 // === Score History (localStorage) ===
 function isDesktop() {
-    return window.innerWidth >= 900 && !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    return /Windows/i.test(navigator.userAgent) && !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 function trackError(n1, n2) {
